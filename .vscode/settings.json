@@ -1,0 +1,10 @@
+{
+  "terminal.integrated.profiles.linux": {
+    "tmux-agente": {
+      "path": "bash",
+      "args": ["-c", "./entrar-agente.sh || bash"],
+      "icon": "terminal-tmux"
+    }
+  },
+  "terminal.integrated.defaultProfile.linux": "bash"
+}
