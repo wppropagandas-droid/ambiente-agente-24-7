@@ -1,0 +1,118 @@
+name: Esteira Cloud - Carimbador & Baixador WP
+
+on:
+  workflow_dispatch:
+    inputs:
+      songs_json:
+        description: 'Lista de faixas em JSON'
+        required: true
+        default: '["Gusttavo Lima - Canudinho"]'
+      count:
+        description: 'Quantidade de carimbos (1, 2 ou 3)'
+        required: false
+        default: '1'
+      spots:
+        description: 'Posicoes dos carimbos (intro,solo_meio,outro)'
+        required: false
+        default: 'solo_meio'
+      jingle:
+        description: 'Tipo de carimbo (confianca ou curto)'
+        required: false
+        default: 'confianca'
+      chat_id:
+        description: 'Telegram Admin Chat ID para notificacao'
+        required: false
+        default: '7080877819'
+
+jobs:
+  process_audio:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Instalar FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+      - name: Instalar Dependências do Pipeline
+        run: |
+          pip install --upgrade pip
+          pip install yt-dlp numpy scipy pypdf google-api-python-client google-auth-oauthlib google-auth-httplib2
+
+      - name: Executar Pipeline de Áudio com Quality Gate 100%
+        id: run_pipeline
+        run: |
+          mkdir -p saida_processada
+          python pipeline/wp_audio_pipeline.py \
+            --songs '${{ github.event.inputs.songs_json }}' \
+            --count ${{ github.event.inputs.count }} \
+            --spots '${{ github.event.inputs.spots }}' \
+            --jingle '${{ github.event.inputs.jingle }}' \
+            --output-dir saida_processada
+
+      - name: Notificar Telegram e Entregar Músicas Aprovadas
+        if: always()
+        env:
+          TELEGRAM_BOT_TOKEN: '9069119880:AAFE5QU8_Wl9lSfVUFFN-_NlHyXw6iFLM1o'
+          CHAT_ID: ${{ github.event.inputs.chat_id }}
+        run: |
+          python -c "
+          import os, glob, requests
+
+          bot_token = os.environ.get('TELEGRAM_BOT_TOKEN')
+          chat_id = os.environ.get('CHAT_ID')
+
+          if not bot_token or not chat_id:
+              print('Credenciais do Telegram ausentes, pulando envio.')
+              exit(0)
+
+          api_url = f'https://api.telegram.org/bot{bot_token}'
+
+          mp3_files = sorted(glob.glob('saida_processada/*.mp3'))
+          zip_files = sorted(glob.glob('saida_processada/*.zip'))
+
+          msg = f'🎉 *Lote de Músicas Processado na Nuvem!*\n\n'
+          msg += f'✅ *Músicas Aprovadas no Quality Gate 100%:* {len(mp3_files)}\n'
+          msg += f'⚡ *Processamento:* 100% Cloud (GitHub Actions 7GB RAM)\n\n'
+          msg += '🎵 *Enviando arquivos de áudio diretamente para o seu Telegram...*'
+
+          requests.post(f'{api_url}/sendMessage', json={
+              'chat_id': chat_id,
+              'text': msg,
+              'parse_mode': 'Markdown'
+          })
+
+          # Envia os arquivos MP3 aprovados diretamente para o chat do Telegram
+          for mp3 in mp3_files:
+              fname = os.path.basename(mp3)
+              with open(mp3, 'rb') as f:
+                  requests.post(f'{api_url}/sendAudio', data={
+                      'chat_id': chat_id,
+                      'title': fname.replace(' (CARIMBADA).mp3', ''),
+                      'performer': 'WP SISTEMAS',
+                      'caption': f'✅ {fname}'
+                  }, files={'audio': f})
+
+          # Envia o pacote ZIP com os projetos Samplitude (.VIP)
+          for z in zip_files:
+              with open(z, 'rb') as f:
+                  requests.post(f'{api_url}/sendDocument', data={
+                      'chat_id': chat_id,
+                      'caption': f'📦 Pacote Completo (Áudios + Projetos VIP Samplitude)'
+                  }, files={'document': f})
+          "
+
+      - name: Armazenar Artefatos no GitHub
+        uses: actions/upload-artifact@v4
+        with:
+          name: lote-musicas-carimbadas
+          path: saida_processada/
+          retention-days: 30
