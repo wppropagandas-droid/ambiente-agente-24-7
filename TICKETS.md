@@ -26,6 +26,7 @@ Este arquivo controla a fila sequencial de tarefas a serem executadas pelos agen
 
 ### Infraestrutura & Chatbot WhatsApp
 - [x] **TICKET-009**: Migrar Chatbot Fusion para conta dedicada no Render (`maratonasemanalcine@gmail.com`), isolando as 750h/mês para nunca mais esgotar horas.
+- [x] **TICKET-010**: Implementar atendimento inteligente humanizado (Clara AI Fusion) com botões clicáveis nativos estilo Claro e Clara da Equatorial (WhatsApp Baileys Native Flow, CTA Copia e Cola Pix 1 toque, Quick Replies e Gemini NLU multi-model).
 
 ---
 
@@ -34,3 +35,4 @@ Este arquivo controla a fila sequencial de tarefas a serem executadas pelos agen
 - **2026-11-27**: Concluídos TICKET-005 e TICKET-006: Motor unificado do pipeline de áudio (`wp_audio_pipeline.py`) desenvolvido e validado de ponta a ponta com detecção acústica inteligente multi-solo (1x, 2x, 3x), cortes cirúrgicos, limiter 0.98, geração de projetos Samplitude (.vip), Quality Gate 100% automatizado e empacotador para Google Drive / Telegram.
 - **2026-11-27**: Concluídos TICKET-007 e TICKET-008: Roteador multi-projetos com teclado customizado (`Fusion Play`, `Carimbador & Músicas`, `Chatbot`) implementado no Telegram Bot (Render), suporte nativo a listas em PDF, links, áudio de voz e acionamento 100% nuvem via GitHub Actions.
 - **2026-11-27**: Concluído TICKET-009: Criada nova conta exclusiva no Render (`maratonasemanalcine@gmail.com`), configurado Web Service `chatbot-fusion` conectado ao repositório `wppropagandas-droid/chatbot-fusion`, deploy concluído com sucesso e serviço 100% online em https://chatbot-fusion-wova.onrender.com (com Keep-Alive ativo e horas exclusivas que nunca esgotam).
+- **2026-11-27**: Concluído TICKET-010: Chatbot WhatsApp atualizado com a inteligência artificial "Clara da Fusion Play" (Gemini Flash NLU com fallback automático), botões interativos nativos do WhatsApp (CTA 1-toque para copiar código Pix, Quick Replies para pagamento, planos e suporte), eliminando respostas engessadas de números fixos e respondendo qualquer dúvida de forma fluida, humanizada e resolutiva (estilo Claro e Clara da Equatorial). Deploy automático realizado no Render com sucesso.
